@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
-import { MenuItemModel } from '../../../Interfaces'
-import { Link } from 'react-router-dom'
+import { MenuItemModel, apiResponse, userModel } from '../../../Interfaces'
+import { Link, useNavigate } from 'react-router-dom'
 import { useUpdateShoppingCartMutation } from '../../../Api/shoppingCartApi'
 import { MiniLoader } from '../Common'
+import { toastNotification } from '../../../Helper'
+import { useSelector } from 'react-redux'
+import { RootState } from '../../../Storage/Redux/store'
 
 interface Props {
 	menuItem: MenuItemModel
@@ -11,16 +14,29 @@ interface Props {
 const MenuItemCard = ({ menuItem }: Props) => {
 	const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
 	const [updateShoppingCart] = useUpdateShoppingCartMutation()
+	const navigate = useNavigate()
+	const userData: userModel = useSelector(
+		(state: RootState) => state.userAuthStore
+	)
 
 	const handleAddToCart = async (menuItemId: number) => {
+		if (!userData.id) {
+			navigate('/login')
+			return
+		}
+
 		setIsAddingToCart(true)
 
-		const response = await updateShoppingCart({
-			userId: '85f5cbd1-9ef2-4a7e-922f-825fae5c2dc5',
+		const response: apiResponse = await updateShoppingCart({
+			userId: userData.id,
 			menuItemId: menuItemId,
 			updateQuantityBy: 1,
 		})
 
+		//need to improve the logic after fixing api isSuccess
+		if (response.data && !response.data.errorMessages) {
+			toastNotification('Item added to cart successfully!', 'success')
+		}
 		setIsAddingToCart(false)
 	}
 

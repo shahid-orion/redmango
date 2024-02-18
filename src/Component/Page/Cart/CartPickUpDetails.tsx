@@ -1,24 +1,31 @@
 import React, { ChangeEvent, FormEvent, useState } from 'react'
-import { cartItemModel } from '../../../Interfaces'
+import { apiResponse, cartItemModel, userModel } from '../../../Interfaces'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../Storage/Redux/store'
 import { inputHelper } from '../../../Helper'
 import { MiniLoader } from '../Common'
+import { useInitiatePaymentMutation } from '../../../Api/paymentApi'
+import { useNavigate } from 'react-router-dom'
 
 type Props = {}
 
 const CartPickUpDetails = (props: Props) => {
 	const [loading, setLoading] = useState(false)
+	const navigate = useNavigate()
 	const shoppingCartFromStore: cartItemModel[] = useSelector(
 		(state: RootState) => state.shoppingCartStore.cartItems ?? []
+	)
+
+	const userData: userModel = useSelector(
+		(state: RootState) => state.userAuthStore
 	)
 
 	let grandTotal = 0
 	let totalItems = 0
 
 	const initialUserData = {
-		name: '',
-		email: '',
+		name: userData.fullName,
+		email: userData.email,
 		phoneNumber: '',
 	}
 
@@ -36,10 +43,18 @@ const CartPickUpDetails = (props: Props) => {
 		setUserInput(tempData)
 	}
 
-	//
+	const [initiatePayment] = useInitiatePaymentMutation()
+
+	//hit payment endpoint
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
 		setLoading(true)
+
+		const { data }: apiResponse = await initiatePayment(userData.id)
+		// const orderSummary = { grandTotal, totalItems }
+		navigate('/payment', {
+			state: { apiResult: data?.result, userInput },
+		})
 	}
 
 	return (

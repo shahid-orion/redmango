@@ -1,5 +1,6 @@
 import React from 'react'
 import { CartPickUpDetails, CartSummary } from '../Component/Page/Cart'
+import { withAuth } from '../HOC'
 
 type Props = {}
 
@@ -16,4 +17,4 @@ const ShoppingCart = (props: Props) => {
 	)
 }
 
-export default ShoppingCart
+export default withAuth(ShoppingCart)

@@ -5,6 +5,6 @@ export default interface shoppingCartModel {
 	userId?: string
 	cartItems?: cartItemModel[]
 	cartTotal?: number
-	sripePaymentIntentId?: any
+	stripePaymentIntentId?: any
 	clientSecret?: any
 }

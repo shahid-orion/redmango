@@ -1,5 +1,5 @@
 import React from 'react'
-import { cartItemModel } from '../../../Interfaces'
+import { cartItemModel, userModel } from '../../../Interfaces'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../../Storage/Redux/store'
 import {
@@ -11,6 +11,9 @@ import { useUpdateShoppingCartMutation } from '../../../Api/shoppingCartApi'
 type Props = {}
 
 const CartSummary = (props: Props) => {
+	const userData: userModel = useSelector(
+		(state: RootState) => state.userAuthStore
+	)
 	const dispatch = useDispatch()
 
 	//calling updateShoppingCart api to update database
@@ -36,7 +39,7 @@ const CartSummary = (props: Props) => {
 			updateShoppingCart({
 				menuItemId: cartItem.menuItem?.id,
 				updateQuantityBy: 0,
-				userId: '85f5cbd1-9ef2-4a7e-922f-825fae5c2dc5',
+				userId: userData.id,
 			})
 			//remove the item
 			dispatch(removeFromCart({ cartItem, quantity: 0 }))
@@ -44,7 +47,7 @@ const CartSummary = (props: Props) => {
 			updateShoppingCart({
 				menuItemId: cartItem.menuItem?.id,
 				updateQuantityBy: updateQuantityBy,
-				userId: '85f5cbd1-9ef2-4a7e-922f-825fae5c2dc5',
+				userId: userData.id,
 			})
 			//update quantity with the new quantity
 			dispatch(

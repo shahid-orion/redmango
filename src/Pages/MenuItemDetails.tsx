@@ -3,6 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom' //to get id
 import { useGetMenuItemByIdQuery } from '../Api/menuItemApi'
 import { useUpdateShoppingCartMutation } from '../Api/shoppingCartApi'
 import { MainLoader, MiniLoader } from '../Component/Page/Common'
+import { apiResponse, userModel } from '../Interfaces'
+import { toastNotification } from '../Helper'
+import { useSelector } from 'react-redux'
+import { RootState } from '../Storage/Redux/store'
 
 type Props = {}
 
@@ -13,6 +17,9 @@ const MenuItemDetails = (props: Props) => {
 	const [quantity, setQuantity] = useState(1)
 	const [isAddingToCart, setIsAddingToCart] = useState<boolean>(false)
 	const [updateShoppingCart] = useUpdateShoppingCartMutation()
+	const userData: userModel = useSelector(
+		(state: RootState) => state.userAuthStore
+	)
 
 	const handleQuantity = (counter: number) => {
 		setQuantity((prevQuantity) => {
@@ -21,17 +28,23 @@ const MenuItemDetails = (props: Props) => {
 		})
 	}
 
-	//USERID: 85f5cbd1-9ef2-4a7e-922f-825fae5c2dc5
 	const handleAddToCart = async (menuItemId: number) => {
+		if (!userData.id) {
+			navigate('/login')
+			return
+		}
 		setIsAddingToCart(true)
 
-		const response = await updateShoppingCart({
-			userId: '85f5cbd1-9ef2-4a7e-922f-825fae5c2dc5',
+		const response: apiResponse = await updateShoppingCart({
+			userId: userData.id,
 			menuItemId: menuItemId,
 			updateQuantityBy: quantity,
 		})
 
-		// console.log(response)
+		//need to improve the logic after fixing api isSuccess
+		if (response.data && !response.data.errorMessages) {
+			toastNotification('Item added to cart successfully!', 'success')
+		}
 
 		setIsAddingToCart(false)
 	}

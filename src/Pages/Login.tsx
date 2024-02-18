@@ -1,7 +1,12 @@
 import React, { ChangeEvent, FormEvent, useState } from 'react'
 import { inputHelper } from '../Helper'
-import { apiResponse } from '../Interfaces'
+import { apiResponse, userModel } from '../Interfaces'
 import { useLoginUserMutation } from '../Api/authApi'
+import jwtDecode from 'jwt-decode'
+import { useDispatch } from 'react-redux'
+import { setLoggedInUser } from '../Storage/Redux/userAuthSlice'
+import { useNavigate } from 'react-router-dom'
+import { MainLoader } from '../Component/Page/Common'
 
 type Props = {}
 
@@ -9,6 +14,8 @@ const Login = (props: Props) => {
 	const [error, setError] = useState('')
 	const [loginUser] = useLoginUserMutation()
 	const [loading, setLoading] = useState(false)
+	const dispatch = useDispatch()
+	const navigate = useNavigate()
 	const [userInput, setUserInput] = useState({
 		userName: '',
 		password: '',
@@ -30,12 +37,13 @@ const Login = (props: Props) => {
 		})
 
 		if (response.data) {
-			console.log(response.data)
 			//save the token that returned with response
-			const { token }: any = response.data.result.token
+			const { token } = response.data.result
+			const { fullName, id, email, role }: userModel = jwtDecode(token)
 			localStorage.setItem('token', token)
+			dispatch(setLoggedInUser({ fullName, id, email, role }))
+			navigate('/')
 		} else if (response.error) {
-			console.log(response.error.data?.errorsMessages)
 			setError(response.error.data?.errorsMessages)
 		}
 
@@ -44,6 +52,7 @@ const Login = (props: Props) => {
 
 	return (
 		<div className='container text-center'>
+			{loading && <MainLoader />}
 			<form method='post' onSubmit={handleSubmit}>
 				<h1 className='mt-5'>Login</h1>
 				<div className='mt-5'>

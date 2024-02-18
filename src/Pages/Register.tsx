@@ -1,8 +1,10 @@
 import React, { ChangeEvent, FormEvent, useState } from 'react'
 import { SD_Role } from '../Utility/SD'
-import { inputHelper } from '../Helper'
+import { inputHelper, toastNotification } from '../Helper'
 import { useRegisterUserMutation } from '../Api/authApi'
 import { apiResponse } from '../Interfaces'
+import { useNavigate } from 'react-router-dom'
+import { MainLoader } from '../Component/Page/Common'
 
 type Props = {}
 
@@ -10,6 +12,8 @@ const Register = (props: Props) => {
 	//
 	const [registerUser] = useRegisterUserMutation()
 	const [loading, setLoading] = useState(false)
+	const navigate = useNavigate()
+
 	const [userInput, setUserInput] = useState({
 		userName: '',
 		password: '',
@@ -37,9 +41,10 @@ const Register = (props: Props) => {
 		})
 
 		if (response.data) {
-			console.log(response.data)
+			toastNotification('Registration successful! Please login', 'success')
+			navigate('/login')
 		} else if (response.error) {
-			console.log(response.error.data.errorMessage[0])
+			toastNotification(response?.error?.data?.errorsMessages[0], 'error')
 		}
 
 		setLoading(false)
@@ -47,6 +52,7 @@ const Register = (props: Props) => {
 
 	return (
 		<div className='container text-center'>
+			{loading && <MainLoader />}
 			<form method='post' onSubmit={handleSubmit}>
 				<h1 className='mt-5'>Register</h1>
 				<div className='mt-5'>
@@ -98,7 +104,7 @@ const Register = (props: Props) => {
 					</div>
 				</div>
 				<div className='mt-5'>
-					<button type='submit' className='btn btn-success'>
+					<button type='submit' className='btn btn-success' disabled={loading}>
 						Register
 					</button>
 				</div>

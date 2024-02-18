@@ -1,15 +1,41 @@
-import { useSelector } from 'react-redux'
-import { NavLink } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { RootState } from '../../Storage/Redux/store'
-import { cartItemModel } from '../../Interfaces'
+import { cartItemModel, userModel } from '../../Interfaces'
+import {
+	setLoggedInUser,
+	emptyUserState,
+} from '../../Storage/Redux/userAuthSlice'
+import { useState } from 'react'
+import { MainLoader, MiniLoader } from '../Page/Common'
+import { SD_Role } from '../../Utility/SD'
 
 let logo = require('../../Assets/Images/mango.png')
 type Props = {}
 
 const Header = (props: Props) => {
+	const [loading, setLoading] = useState(false)
+	const dispatch = useDispatch()
+	const navigate = useNavigate()
 	const shoppingCartFromStore: cartItemModel[] = useSelector(
 		(state: RootState) => state.shoppingCartStore.cartItems ?? []
 	)
+
+	const userData: userModel = useSelector(
+		(state: RootState) => state.userAuthStore
+	)
+
+	//logout
+	const handleLogout = () => {
+		setLoading(true)
+		localStorage.removeItem('token')
+
+		dispatch(setLoggedInUser({ ...emptyUserState }))
+
+		navigate('/')
+		setLoading(false)
+	}
+
 	return (
 		<div>
 			<nav className='navbar navbar-expand-lg bg-dark navbar-dark'>
@@ -42,6 +68,66 @@ const Header = (props: Props) => {
 									<i className='bi bi-house-door'></i>
 								</NavLink>
 							</li>
+
+							{userData.role == SD_Role.ADMIN ? (
+								<li className='nav-item dropdown'>
+									<a
+										className='nav-link dropdown-toggle'
+										href='/'
+										role='button'
+										data-bs-toggle='dropdown'
+										aria-expanded='false'
+									>
+										Admin Panel
+									</a>
+									<ul className='dropdown-menu'>
+										<li
+											className='dropdown-item'
+											style={{ cursor: 'pointer' }}
+											onClick={() => navigate('order/myorders')}
+										>
+											My Orders
+										</li>
+										<li
+											className='dropdown-item'
+											style={{ cursor: 'pointer' }}
+											onClick={() => navigate('order/allOrders')}
+										>
+											All Orders
+										</li>
+									</ul>
+								</li>
+							) : (
+								<li className='nav-item'>
+									<NavLink
+										className='nav-link'
+										aria-current='page'
+										to='/order/myOrders'
+									>
+										Orders
+									</NavLink>
+								</li>
+							)}
+
+							{/* <li className='nav-item'>
+								<NavLink
+									className='nav-link'
+									aria-current='page'
+									to='/authentication'
+								>
+									Authentication
+								</NavLink>
+							</li>
+							<li className='nav-item'>
+								<NavLink
+									className='nav-link'
+									aria-current='page'
+									to='/authorization'
+								>
+									Authorization
+								</NavLink>
+							</li> */}
+
 							<li className='nav-item'>
 								<NavLink
 									className='nav-link'
@@ -49,71 +135,64 @@ const Header = (props: Props) => {
 									to='/shoppingCart'
 								>
 									<i className='bi bi-cart3'></i>
-									{shoppingCartFromStore?.length
-										? ` (${shoppingCartFromStore?.length})`
-										: ''}
+									{userData.id && ` (${shoppingCartFromStore.length})`}
 								</NavLink>
 							</li>
 
-							<li className='nav-item dropdown'>
-								<a
-									className='nav-link dropdown-toggle'
-									href='#'
-									role='button'
-									data-bs-toggle='dropdown'
-									aria-expanded='false'
-								>
-									Admin Panel
-								</a>
-								<ul className='dropdown-menu'>
-									<li>
-										<a className='dropdown-item' href='#'>
-											Action
-										</a>
-									</li>
-									<li>
-										<a className='dropdown-item' href='#'>
-											Another action
-										</a>
-									</li>
-									<li>
-										<a className='dropdown-item' href='#'>
-											Something else here
-										</a>
-									</li>
-								</ul>
-							</li>
 							<div className='d-flex' style={{ marginLeft: 'auto' }}>
-								<li className='nav-item'>
-									<button
-										className='btn btn-success btn-outlined rounded-pill text-white mx-2'
-										style={{
-											border: 'none',
-											height: '2.5rem',
-											width: '6.5rem',
-										}}
-									>
-										Logout
-									</button>
-								</li>
-								<li className='nav-item text-white'>
-									<NavLink className='nav-link' to='/register'>
-										Register
-									</NavLink>
-								</li>
-								<li className='nav-item text-white'>
-									<NavLink
-										className='btn btn-success btn-outlined rounded-pill text-white mx-2'
-										style={{
-											border: 'none',
-											height: '2.5rem',
-											width: '6.5rem',
-										}}
-										to='/login'
-									>
-										Login
-									</NavLink>
-								</li>
+								{userData.id && (
+									<>
+										<li className='nav-item'>
+											<button
+												className='nav-link active'
+												style={{
+													cursor: 'pointer',
+													background: 'transparent',
+													border: 0,
+												}}
+											>
+												Welcome, {userData.fullName} !
+											</button>
+										</li>
+										{loading && <MainLoader />}
+										<li className='nav-item'>
+											<button
+												className='btn btn-success btn-outlined rounded-pill text-white mx-2'
+												style={{
+													border: 'none',
+													height: '2.5rem',
+													width: '6.5rem',
+												}}
+												onClick={handleLogout}
+											>
+												Logout
+											</button>
+										</li>
+									</>
+								)}
+
+								{!userData.id && (
+									<>
+										<li className='nav-item text-white'>
+											<NavLink className='nav-link' to='/register'>
+												Register
+											</NavLink>
+										</li>
+										<li className='nav-item text-white'>
+											<NavLink
+												className='btn btn-success btn-outlined rounded-pill text-white mx-2'
+												style={{
+													border: 'none',
+													height: '2.5rem',
+													width: '6.5rem',
+												}}
+												to='/login'
+											>
+												Login
+											</NavLink>
+										</li>
+									</>
+								)}
 							</div>
 						</ul>
 					</div>
