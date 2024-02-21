@@ -1,0 +1,4 @@
+{
+	"appService.defaultWebAppToDeploy": "/subscriptions/4702755d-4664-4798-9d01-44de3620272e/resourceGroups/react-dotnetapi/providers/Microsoft.Web/sites/RedMangoAPI01",
+	"appService.deploySubpath": "."
+}

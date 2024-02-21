@@ -84,6 +84,13 @@ const Header = (props: Props) => {
 										<li
 											className='dropdown-item'
 											style={{ cursor: 'pointer' }}
+											onClick={() => navigate('/menuItem/menuitemlist')}
+										>
+											Menu Item
+										</li>
+										<li
+											className='dropdown-item'
+											style={{ cursor: 'pointer' }}
 											onClick={() => navigate('order/myorders')}
 										>
 											My Orders

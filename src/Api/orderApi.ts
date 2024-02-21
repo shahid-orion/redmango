@@ -1,11 +1,16 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
 
 //https://redmangoapi01.azurewebsites.net/index.html
+//baseUrl: 'https://localhost:7255/api/',
 const orderApi = createApi({
 	reducerPath: 'orderApi',
 	baseQuery: fetchBaseQuery({
-		// baseUrl: 'https://localhost:7255/api',
-		baseUrl: 'https://redmangoapi01.azurewebsites.net/api/',
+		baseUrl: 'https://localhost:7255/api',
+		// baseUrl: 'https://redmangoapi01.azurewebsites.net/api/',
+		prepareHeaders: (headers: Headers, api) => {
+			const token = localStorage.getItem('token')
+			token && headers.append('Authorization', 'Bearer ' + token)
+		},
 	}),
 	tagTypes: ['Orders'],
 	endpoints: (builder) => ({
@@ -33,6 +38,15 @@ const orderApi = createApi({
 			}),
 			providesTags: ['Orders'],
 		}),
+		updateOrderHeader: builder.mutation({
+			query: (orderDetails) => ({
+				url: 'order/' + orderDetails.orderHeaderId,
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: orderDetails,
+			}),
+			invalidatesTags: ['Orders'],
+		}),
 	}),
 })
 
@@ -40,5 +54,6 @@ export const {
 	useCreateOrderMutation,
 	useGetAllOrdersQuery,
 	useGetOrderDetailsQuery,
+	useUpdateOrderHeaderMutation,
 } = orderApi
 export default orderApi

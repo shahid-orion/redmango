@@ -1,10 +1,10 @@
 import { ChangeEvent } from 'react'
 
 const inputHelper = (
-	e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+	e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
 	data: any
 ) => {
-	const tempData = { ...data }
+	const tempData: any = { ...data }
 
 	tempData[e.target.name] = e.target.value
 

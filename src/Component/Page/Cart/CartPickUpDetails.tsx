@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FormEvent, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
 import { apiResponse, cartItemModel, userModel } from '../../../Interfaces'
 import { useSelector } from 'react-redux'
 import { RootState } from '../../../Storage/Redux/store'
@@ -44,6 +44,14 @@ const CartPickUpDetails = (props: Props) => {
 	}
 
 	const [initiatePayment] = useInitiatePaymentMutation()
+
+	useEffect(() => {
+		setUserInput({
+			name: userData.fullName,
+			email: userData.email,
+			phoneNumber: '',
+		})
+	}, [userData])
 
 	//hit payment endpoint
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
